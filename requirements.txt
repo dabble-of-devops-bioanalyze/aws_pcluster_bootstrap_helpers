@@ -1,0 +1,11 @@
+typer
+rich
+typer[all]
+typer-cli
+prefect>=2
+prefect-shell
+prefect-aws
+aws-parallelcluster>=3.1
+colorlog
+click>=8
+datasize
