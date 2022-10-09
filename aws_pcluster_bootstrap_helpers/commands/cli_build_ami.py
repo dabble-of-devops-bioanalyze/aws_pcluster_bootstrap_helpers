@@ -77,18 +77,6 @@ def build_complete(image_id: str, output_file: str, region="us-east-1"):
     return build_in_process
 
 
-@flow
-def watch_ami_build_flow(
-    image_id: str, output_file: pathlib.Path, region: str = "us-east-1"
-):
-    output_file = str(output_file)
-    build_in_progress(image_id=image_id, region=region)
-    build_data = build_complete(
-        image_id=image_id, region=region, output_file=output_file
-    )
-    return build_data
-
-
 def start_build(image_id: str, region: str, config_file: str):
     shell_run_command(
         command=f"""pcluster build-image \\
@@ -115,6 +103,23 @@ def build_ami_flow(
         """
         raise ValueError(w)
     return True
+
+
+@flow
+def watch_ami_build_flow(
+    image_id: str,
+    output_file: pathlib.Path,
+    config_file: pathlib.Path,
+    region: str = "us-east-1"
+):
+    output_file = str(output_file)
+    config_file = str(config_file)
+    start_build(image_id=image_id, region=region, config_file=config_file, )
+    build_in_progress(image_id=image_id, region=region)
+    build_data = build_complete(
+        image_id=image_id, region=region, output_file=output_file
+    )
+    return build_data
 
 
 def main(image_id: str, output_file: pathlib.Path, region: str = "us-east-1"):

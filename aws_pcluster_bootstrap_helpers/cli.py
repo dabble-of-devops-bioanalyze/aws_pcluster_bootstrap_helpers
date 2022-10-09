@@ -73,12 +73,11 @@ def build_and_watch_ami_cli(
     """
     Start to build a pcluster AMI and wait for the build to complete
     """
-    cli_build_ami.build_ami_flow(
+    cli_build_ami.watch_ami_build_flow(
         image_id=image_id,
+        config_file=config_file,
         output_file=output,
         region=region,
-        config_file=config_file,
-        pcluster_version=pcluster_version,
     )
 
 
