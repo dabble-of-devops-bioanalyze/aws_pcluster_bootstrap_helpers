@@ -1,7 +1,6 @@
 typer
 rich
 typer[all]
-typer-cli
 prefect>=2
 prefect-shell
 prefect-aws
