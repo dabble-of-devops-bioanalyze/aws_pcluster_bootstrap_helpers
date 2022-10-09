@@ -85,6 +85,7 @@ def describe_cluster(cluster_name: str, output_file: str, region="us-east-1"):
 def create_cluster(cluster_name: str, region: str, config_file: str):
     shell_run_command(
         command=f"""pcluster create-cluster \\
+  --rollback-on-failure false \\
   -n {cluster_name} \\
   -r {region} \\
   -c {config_file}
