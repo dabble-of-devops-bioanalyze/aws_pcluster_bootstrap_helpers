@@ -181,7 +181,10 @@ def get_instance_types(
     if len(include_mems):
         cpu_df = cpu_df[cpu_df['size_in_gibs'].isin(include_mems)]
 
+    return dict(gpu_df=gpu_df, cpu_df=cpu_df, all_df=df)
+
+
+def write_instance_types_csvs(gpu_df: pd.DataFrame, cpu_df: pd.DataFrame):
     logger.info('Writing out gpu and cpu instance types...')
     gpu_df.to_csv('pcluster_gpu_instances.csv', index=False)
     cpu_df.to_csv('pcluster_cpu_instances.csv', index=False)
-    return

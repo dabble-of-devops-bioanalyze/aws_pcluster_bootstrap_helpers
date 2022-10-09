@@ -5,6 +5,8 @@ prefect>=2
 prefect-shell
 prefect-aws
 aws-parallelcluster>=3.1
+inquirer
 colorlog
+textual
 click>=8
 datasize
