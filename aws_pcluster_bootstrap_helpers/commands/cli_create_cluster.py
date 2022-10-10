@@ -82,15 +82,25 @@ def describe_cluster(cluster_name: str, output_file: str, region="us-east-1"):
 
 
 def create_cluster(cluster_name: str, region: str, config_file: str):
-    shell_run_command(
-        command=f"""pcluster create-cluster \\
-  --rollback-on-failure false \\
-  -n {cluster_name} \\
-  -r {region} \\
-  -c {config_file}
-""",
-        return_all=True,
-    )
+    try:
+        shell_run_command(
+            command=f"""pcluster create-cluster \\
+      --rollback-on-failure false \\
+      -n {cluster_name} \\
+      -r {region} \\
+      -c {config_file}
+    """,
+            return_all=True,
+        )
+    except Exception as e:
+        if "already exist" in e.message:
+            logger.info(
+                f"""Cluster: {cluster_name} already exists.
+                 In order to create a new cluster with the same name you must first delete this cluster."""
+            )
+            return
+        else:
+            raise Exception(e)
     return
 
 
