@@ -43,6 +43,8 @@ def read_json(content, file):
         return True
     elif "COMPLETE" not in image_status and "FAIL" not in image_status:
         return True
+    elif "COMPLETE" in image_status:
+        return False
     elif image_status == "BUILD_COMPLETE":
         return False
     else:
@@ -120,6 +122,14 @@ def watch_ami_build_flow(
         image_id=image_id, region=region, output_file=output_file
     )
     return build_data
+
+
+@flow
+def watch_ami_flow(image_id: str, output_file: pathlib.Path, region: str = "us-east-1"):
+    build_in_progress(image_id=image_id, region=region)
+    build_data = build_complete(
+        image_id=image_id, region=region, output_file=output_file
+    )
 
 
 def main(image_id: str, output_file: pathlib.Path, region: str = "us-east-1"):
