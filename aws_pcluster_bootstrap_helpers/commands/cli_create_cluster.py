@@ -30,7 +30,6 @@ def parse_json_status(content, file):
         logger.warn(f"Error reading in pcluster create file: {file}: {e}")
         raise Exception(e)
 
-    del data["imageConfiguration"]["url"]
     cluster_status = data["clusterStatus"]
     logger.info(f"Pcluster create status: {cluster_status}")
     if "FAILED" in cluster_status:
