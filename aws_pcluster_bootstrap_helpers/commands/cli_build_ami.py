@@ -1,10 +1,13 @@
 import os
+from typing import Dict, Any, List, Optional
 import pathlib
 from prefect import flow, task
 from prefect_shell import shell_run_command
 import time
 import tempfile
 import json
+from pcluster.api.controllers.image_operations_controller import describe_image
+from pcluster.api.models import DescribeImageResponseContent
 
 from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
 
@@ -22,16 +25,8 @@ DELETE_FAILED = "DELETE_FAILED"
 DELETE_COMPLETE = "DELETE_COMPLETE"
 
 
-def read_json(content, file):
-    f = open(file)
-    try:
-        data = json.load(f)
-    except Exception as e:
-        logger.warn(f"Error reading in pcluster build file: {file}: {e}")
-        raise Exception(e)
-
-    del data["imageConfiguration"]["url"]
-    image_status = data["imageBuildStatus"]
+def parse_image_status(data: DescribeImageResponseContent):
+    image_status = data.image_build_status
     logger.info(f"Pcluster build status: {image_status}")
     if image_status == "BUILD_FAILED":
         raise Exception(f"Image build failed: {image_status}")
@@ -55,28 +50,17 @@ def build_in_progress(image_id: str, region="us-east-1"):
     build_in_process = True
     n = 1
     while build_in_process:
-        with tempfile.NamedTemporaryFile(suffix=".json") as tmpfile:
-            logger.info(
-                f"Pcluster: {image_id}, Region: {region}, N: {1} Data file: {tmpfile.name}"
-            )
-            contents = shell_run_command(
-                command=f"pcluster describe-image --image-id {image_id} --region {region} > {tmpfile.name}",
-                return_all=True,
-            )
-            build_in_process = read_json(contents, tmpfile.name)
+        build_data = describe_image(image_id=image_id)
+        build_in_process = parse_image_status(build_data)
         n = n + 1
         # sleep for 10 minutes
         if build_in_process:
             time.sleep(600)
 
 
-def build_complete(image_id: str, output_file: str, region="us-east-1"):
-    contents = shell_run_command(
-        command=f"pcluster describe-image --image-id {image_id} --region {region} > {output_file}",
-        return_all=True,
-    )
-    build_in_process = read_json(contents, output_file)
-    return build_in_process
+def build_complete(image_id: str, output_file: str, region="us-east-1") -> DescribeImageResponseContent:
+    build_data = describe_image(image_id=image_id)
+    return build_data
 
 
 def start_build(image_id: str, region: str, config_file: str):

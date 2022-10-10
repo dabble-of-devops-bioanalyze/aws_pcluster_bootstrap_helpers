@@ -86,10 +86,12 @@ def get_instance_types(
         include_mems = []
 
     queues = {}
+    logger.info(f"Getting instance types for region: {region}")
     os.environ["AWS_DEFAULT_REGION"] = region
     instance_types = AWSApi.instance().ec2.list_instance_types()
     instance_records = []
     instance_type_infos = []
+    logger.info(f"Getting instance type info for {len(instance_types)} in region {region}")
     for instance_type in instance_types:
         info = AWSApi.instance().ec2.get_instance_type_info(instance_type)
         instance_type = info.__dict__["instance_type_data"]
@@ -139,6 +141,7 @@ def get_instance_types(
         instance_records.append(instance_record)
 
         instance_type_infos.append(instance_type)
+    logger.info(f"Generating data frame")
     df = pd.DataFrame.from_records(instance_records)
     df = df[df["arch"].str.contains(architecture)]
     families = list(df["family"].unique())
@@ -181,6 +184,7 @@ def get_instance_types(
     if len(include_mems):
         cpu_df = cpu_df[cpu_df['size_in_gibs'].isin(include_mems)]
 
+    logger.info("Complete get instance types")
     return dict(gpu_df=gpu_df, cpu_df=cpu_df, all_df=df)
 
 

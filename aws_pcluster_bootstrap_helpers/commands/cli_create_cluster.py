@@ -7,6 +7,7 @@ import tempfile
 import json
 
 from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
+from pcluster.api.controllers.cluster_operations_controller import list_clusters
 
 from pcluster import utils
 
@@ -82,8 +83,23 @@ def describe_cluster(cluster_name: str, output_file: str, region="us-east-1"):
 
 
 def create_cluster(cluster_name: str, region: str, config_file: str):
-    try:
-        shell_run_command(
+    state = None
+    clusters = list_clusters(region=region)
+    found = False
+    if len(clusters.clusters):
+        for cluster in clusters.clusters:
+            if 'cluster_name' in cluster:
+                if cluster_name == cluster['cluster_name']:
+                    found = True
+    if found:
+        logger.info(
+            f"""Cluster {cluster_name} already found.
+             If you would like to create a new cluster you must first delete this cluster.
+             """
+        )
+        state = True
+    else:
+        state = shell_run_command(
             command=f"""pcluster create-cluster \\
       --rollback-on-failure false \\
       -n {cluster_name} \\
@@ -92,15 +108,6 @@ def create_cluster(cluster_name: str, region: str, config_file: str):
     """,
             return_all=True,
         )
-    except Exception as e:
-        if "already exist" in e.message:
-            logger.info(
-                f"""Cluster: {cluster_name} already exists.
-                 In order to create a new cluster with the same name you must first delete this cluster."""
-            )
-            return
-        else:
-            raise Exception(e)
     return
 
 
