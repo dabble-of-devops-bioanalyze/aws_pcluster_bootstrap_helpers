@@ -64,7 +64,7 @@ def watch_create_cluster(cluster_name: str, region="us-east-1"):
             )
             create_in_process = parse_json_status(contents, tmpfile.name)
         n = n + 1
-        # sleep for 10 minutes
+        # sleep for 1 minutes
         if create_in_process:
             time.sleep(60)
     return create_in_process
@@ -88,9 +88,8 @@ def create_cluster(cluster_name: str, region: str, config_file: str):
     found = False
     if len(clusters.clusters):
         for cluster in clusters.clusters:
-            if 'cluster_name' in cluster:
-                if cluster_name == cluster['cluster_name']:
-                    found = True
+            if cluster_name == cluster.cluster_name:
+                found = True
     if found:
         logger.info(
             f"""Cluster {cluster_name} already found.
