@@ -66,7 +66,7 @@ def watch_create_cluster(cluster_name: str, region="us-east-1"):
         n = n + 1
         # sleep for 10 minutes
         if create_in_process:
-            time.sleep(600)
+            time.sleep(60)
     return create_in_process
 
 
