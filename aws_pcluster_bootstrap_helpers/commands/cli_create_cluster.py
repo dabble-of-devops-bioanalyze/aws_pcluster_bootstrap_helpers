@@ -97,7 +97,9 @@ def create_cluster(cluster_name: str, region: str, config_file: str):
 
 @flow
 def watch_cluster_create_flow(
-    cluster_name: str, config_file: pathlib.Path, region: str = "us-east-1",
+    cluster_name: str,
+    config_file: pathlib.Path,
+    region: str = "us-east-1",
 ):
     create_cluster(cluster_name=cluster_name, region=region, config_file=str(config_file))
     watch_create_cluster(cluster_name=cluster_name, region=region)

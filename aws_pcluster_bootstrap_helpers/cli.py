@@ -99,9 +99,8 @@ def create_and_watch_cluster(
     """
     cli_create_cluster.watch_cluster_create_flow(
         region=region,
-        confile_file=config_file,
+        config_file=config_file,
         cluster_name=cluster_name,
-        pcluster_version=pcluster_version,
     )
     return
 
