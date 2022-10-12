@@ -44,7 +44,9 @@ def parse_json_status(content, file):
     elif cluster_status == "CREATE_COMPLETE":
         return False
     else:
-        raise Exception(f"Cluster status not compatible with bootstrap: {cluster_status}")
+        raise Exception(
+            f"Cluster status not compatible with bootstrap: {cluster_status}"
+        )
 
 
 def watch_create_cluster(cluster_name: str, region="us-east-1"):
@@ -116,7 +118,9 @@ def watch_cluster_create_flow(
     config_file: pathlib.Path,
     region: str = "us-east-1",
 ):
-    create_cluster(cluster_name=cluster_name, region=region, config_file=str(config_file))
+    create_cluster(
+        cluster_name=cluster_name, region=region, config_file=str(config_file)
+    )
     watch_create_cluster(cluster_name=cluster_name, region=region)
     return True
 
@@ -133,5 +137,7 @@ def create_cluster_flow(
         Specified: {pcluster_version}, Installed: {PCLUSTER_VERSION}
         """
         raise ValueError(w)
-    create_cluster(cluster_name=cluster_name, region=region, config_file=str(config_file))
+    create_cluster(
+        cluster_name=cluster_name, region=region, config_file=str(config_file)
+    )
     return True

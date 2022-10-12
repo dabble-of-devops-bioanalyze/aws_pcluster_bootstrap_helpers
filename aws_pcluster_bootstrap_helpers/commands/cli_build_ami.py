@@ -25,8 +25,9 @@ DELETE_FAILED = "DELETE_FAILED"
 DELETE_COMPLETE = "DELETE_COMPLETE"
 
 
-def parse_image_status(data: DescribeImageResponseContent):
-    image_status = data.image_build_status
+def parse_image_status(data: Any):
+    # image_status = data.image_build_status
+    image_status = data["imageBuildStatus"]
     logger.info(f"Pcluster build status: {image_status}")
     if image_status == "BUILD_FAILED":
         raise Exception(f"Image build failed: {image_status}")
@@ -50,7 +51,17 @@ def build_in_progress(image_id: str, region="us-east-1"):
     build_in_process = True
     n = 1
     while build_in_process:
-        build_data = describe_image(image_id=image_id)
+        with tempfile.NamedTemporaryFile(suffix=".json") as tmpfile:
+            logger.info(
+                f"Pcluster: {image_id}, Region: {region}, N: {1} Data file: {tmpfile.name}"
+            )
+            contents = shell_run_command(
+                command=f"pcluster describe-image --image-id {image_id} --region {region} > {tmpfile.name}",
+                return_all=True,
+            )
+            # build_data = describe_image(image_id=image_id)
+            build_data = json.loads(open(tmpfile.name, 'r').read())
+            logger.info(build_data)
         build_in_process = parse_image_status(build_data)
         n = n + 1
         # sleep for 10 minutes
@@ -58,20 +69,25 @@ def build_in_progress(image_id: str, region="us-east-1"):
             time.sleep(600)
 
 
-def build_complete(image_id: str, output_file: str, region="us-east-1") -> DescribeImageResponseContent:
+def build_complete(
+    image_id: str, output_file: str, region="us-east-1"
+) -> DescribeImageResponseContent:
     build_data = describe_image(image_id=image_id)
     return build_data
 
 
 def start_build(image_id: str, region: str, config_file: str):
-    shell_run_command(
-        command=f"""pcluster build-image \\
-  --image-id {image_id} \\
-  -r {region} \\
-  -c {config_file}
-""",
-        return_all=True,
-    )
+    try:
+        shell_run_command(
+            command=f"""pcluster build-image \\
+      --image-id {image_id} \\
+      -r {region} \\
+      -c {config_file}
+    """,
+            return_all=True,
+        )
+    except Exception as e:
+        return
     return
 
 
@@ -88,6 +104,7 @@ def build_ami_flow(
         Specified: {pcluster_version}, Installed: {PCLUSTER_VERSION}
         """
         raise ValueError(w)
+    start_build(image_id, region, str(config_file))
     return True
 
 
@@ -96,11 +113,15 @@ def watch_ami_build_flow(
     image_id: str,
     output_file: pathlib.Path,
     config_file: pathlib.Path,
-    region: str = "us-east-1"
+    region: str = "us-east-1",
 ):
     output_file = str(output_file)
     config_file = str(config_file)
-    start_build(image_id=image_id, region=region, config_file=config_file, )
+    start_build(
+        image_id=image_id,
+        region=region,
+        config_file=config_file,
+    )
     build_in_progress(image_id=image_id, region=region)
     build_data = build_complete(
         image_id=image_id, region=region, output_file=output_file

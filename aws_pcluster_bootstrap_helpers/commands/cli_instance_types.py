@@ -73,7 +73,9 @@ def get_instance_types(
     n_gpu_queues: int = 4,
 ):
     if n_gpu_queues + n_cpu_queues > MAX_NUMBER_OF_QUEUES:
-        raise ValueError(f"Gpu queues + CPU Queues must be less than {MAX_NUMBER_OF_QUEUES}")
+        raise ValueError(
+            f"Gpu queues + CPU Queues must be less than {MAX_NUMBER_OF_QUEUES}"
+        )
     if include_families is None:
         include_families = []
     if exclude_families is None:
@@ -91,7 +93,9 @@ def get_instance_types(
     instance_types = AWSApi.instance().ec2.list_instance_types()
     instance_records = []
     instance_type_infos = []
-    logger.info(f"Getting instance type info for {len(instance_types)} in region {region}")
+    logger.info(
+        f"Getting instance type info for {len(instance_types)} in region {region}"
+    )
     for instance_type in instance_types:
         info = AWSApi.instance().ec2.get_instance_type_info(instance_type)
         instance_type = info.__dict__["instance_type_data"]
@@ -179,16 +183,16 @@ def get_instance_types(
         gpu_dfs = np.array_split(gpu_df, MAX_NUMBER_OF_COMPUTE_RESOURCES)
         for i, t_gpu_df in enumerate(gpu_dfs):
             n = i + 1
-            queues[f"gpu-{n}"] = t_gpu_df.to_dict('records')
+            queues[f"gpu-{n}"] = t_gpu_df.to_dict("records")
 
     if len(include_mems):
-        cpu_df = cpu_df[cpu_df['size_in_gibs'].isin(include_mems)]
+        cpu_df = cpu_df[cpu_df["size_in_gibs"].isin(include_mems)]
 
     logger.info("Complete get instance types")
     return dict(gpu_df=gpu_df, cpu_df=cpu_df, all_df=df)
 
 
 def write_instance_types_csvs(gpu_df: pd.DataFrame, cpu_df: pd.DataFrame):
-    logger.info('Writing out gpu and cpu instance types...')
-    gpu_df.to_csv('pcluster_gpu_instances.csv', index=False)
-    cpu_df.to_csv('pcluster_cpu_instances.csv', index=False)
+    logger.info("Writing out gpu and cpu instance types...")
+    gpu_df.to_csv("pcluster_gpu_instances.csv", index=False)
+    cpu_df.to_csv("pcluster_cpu_instances.csv", index=False)
