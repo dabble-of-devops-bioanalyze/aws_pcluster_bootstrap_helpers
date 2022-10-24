@@ -14,6 +14,7 @@ from pcluster.api.models import DescribeImageResponseContent
 from mypy_boto3_logs.client import CloudWatchLogsClient
 from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
 from aws_pcluster_bootstrap_helpers.utils.cloudwatch import print_logs
+from aws_pcluster_bootstrap_helpers.utils.commands import run_bash_verbose
 
 from pcluster import utils
 
@@ -117,21 +118,31 @@ def build_in_progress(image_id: str, region="us-east-1"):
 
 
 def build_complete(
-    image_id: str, output_file: str, region="us-east-1"
-) -> DescribeImageResponseContent:
-    build_data = describe_image(image_id=image_id, region=region)
-    return build_data
-
-
-def start_build(image_id: str, region: str, config_file: str):
+    image_id: str,
+    output_file: str,
+    region="us-east-1"
+):
     try:
         shell_run_command(
-            command=f"""pcluster build-image \\
+            command=f"""pcluster describe-image \\
       --image-id {image_id} \\
-      -r {region} \\
-      -c {config_file}
+      -r {region} > {output_file} \\
     """,
             return_all=True,
+        )
+    except Exception as e:
+        return
+    return
+
+
+def start_build(
+    image_id: str,
+    region: str,
+    config_file: str
+):
+    try:
+        run_bash_verbose(
+            command=f"""pcluster build-image --image-id {image_id} -r {region} -c {config_file} """,
         )
     except Exception as e:
         return
@@ -164,23 +175,31 @@ def watch_ami_build_flow(
 ):
     output_file = str(output_file)
     config_file = str(config_file)
+    logger.info(f"Building ami: {image_id} {region}")
     start_build(
         image_id=image_id,
         region=region,
         config_file=config_file,
     )
+    logger.info(f"Babysitting ami build: {image_id} {region}")
     build_in_progress(image_id=image_id, region=region)
-    build_data = build_complete(
-        image_id=image_id, region=region, output_file=output_file
+    logger.info(f"Build complete!: {image_id} {region}")
+    build_complete(
+        image_id=image_id,
+        region=region,
+        output_file=output_file
     )
-    return build_data
+    logger.info(f"Build complete and data written to : {output_file}")
+    return
 
 
 @flow
 def watch_ami_flow(image_id: str, output_file: pathlib.Path, region: str = "us-east-1"):
     build_in_progress(image_id=image_id, region=region)
-    build_data = build_complete(
-        image_id=image_id, region=region, output_file=output_file
+    build_complete(
+        image_id=image_id,
+        region=region,
+        output_file=output_file
     )
 
 

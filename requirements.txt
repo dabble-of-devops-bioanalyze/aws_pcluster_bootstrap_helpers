@@ -13,3 +13,5 @@ datasize
 questionary
 boto3-stubs[s3,ec2,batch,logs,essential]
 boto3
+funcy
+humanize
