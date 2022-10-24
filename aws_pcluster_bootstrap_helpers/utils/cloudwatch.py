@@ -11,7 +11,7 @@ def get_human_readable_time(last_time_stamp):
         last_time_stamp / 1000.0).isoformat()
 
 
-def get_log_events(
+def get_log_events_wrapper(
     client: CloudWatchLogsClient,
     log_group,
     log_stream_name,
@@ -88,7 +88,7 @@ def print_logs(
     log_group: str = "/aws/batch/job",
     start_time: int = 0
 ) -> int:
-    log_events = get_log_events(
+    log_events = get_log_events_wrapper(
         client, log_group=log_group,
         log_stream_name=log_stream_name,
         start_time=start_time

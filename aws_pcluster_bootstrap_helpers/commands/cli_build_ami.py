@@ -29,9 +29,8 @@ DELETE_FAILED = "DELETE_FAILED"
 DELETE_COMPLETE = "DELETE_COMPLETE"
 
 
-def parse_image_status(data: Any):
-    # image_status = data.image_build_status
-    image_status = data["imageBuildStatus"]
+def parse_image_status(data: DescribeImageResponseContent):
+    image_status = data.image_build_status
     logger.info(f"Pcluster build status: {image_status}")
     if image_status == "BUILD_FAILED":
         raise Exception(f"Image build failed: {image_status}")
@@ -52,7 +51,7 @@ def parse_image_status(data: Any):
 
 
 def build_ami_logs(
-    data: Any,
+    data: DescribeImageResponseContent,
     log_client: CloudWatchLogsClient,
     start_time: int = 0
 ):
@@ -69,7 +68,9 @@ def build_ami_logs(
     -------
 
     """
-    log_stream_name = data['imageBuildLogsArn']
+    log_stream_name = data.image_build_logs_arn
+    if not log_stream_name:
+        return 0
     log_stream_name = log_stream_name.split(':').pop()
     log_group = deepcopy(log_stream_name)
     log_group = log_group.split('/')
@@ -88,26 +89,25 @@ def build_ami_logs(
 
 def build_in_progress(image_id: str, region="us-east-1"):
     os.environ['AWS_DEFAULT_REGION'] = region
-    client = boto3.client('cloudwatch')
+    client = boto3.client('logs')
     start_time = 0
 
     build_in_process = True
     n = 1
     while build_in_process:
-        with tempfile.NamedTemporaryFile(suffix=".json") as tmpfile:
-            logger.info(
-                f"Pcluster: {image_id}, Region: {region}, N: {1} Data file: {tmpfile.name}"
-            )
-            contents = shell_run_command(
-                command=f"pcluster describe-image --image-id {image_id} --region {region} > {tmpfile.name}",
-                return_all=True,
-            )
-            # build_data = describe_image(image_id=image_id, region=region)
-            build_data = json.loads(open(tmpfile.name, "r").read())
-            logger.info(build_data)
-        print(f'Image Build:[{image_id} - {region}] Build in process: {build_in_process}')
-        start_time = build_ami_logs(data=build_data, log_client=client, start_time=start_time)
+        logger.info(
+            f"Pcluster: {image_id}, Region: {region}, N: {n}"
+        )
+        build_data = describe_image(image_id=image_id, region=region)
+        logger.info(build_data)
+        try:
+            start_time = build_ami_logs(data=build_data, log_client=client, start_time=start_time)
+        except Exception as e:
+            # logs only exist for a certain time
+            # if they go away just skip this
+            pass
         build_in_process = parse_image_status(build_data)
+        print(f'Image Build:[{image_id} - {region}] Build in process: {build_in_process}')
 
         n = n + 1
         # sleep for 10 minutes
