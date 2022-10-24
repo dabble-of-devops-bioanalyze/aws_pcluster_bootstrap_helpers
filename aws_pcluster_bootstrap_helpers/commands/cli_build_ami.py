@@ -1,4 +1,6 @@
 import os
+from copy import deepcopy
+import boto3
 from typing import Dict, Any, List, Optional
 import pathlib
 from prefect import flow, task
@@ -9,7 +11,9 @@ import json
 from pcluster.api.controllers.image_operations_controller import describe_image
 from pcluster.api.models import DescribeImageResponseContent
 
+from mypy_boto3_logs.client import CloudWatchLogsClient
 from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
+from aws_pcluster_bootstrap_helpers.utils.cloudwatch import print_logs
 
 from pcluster import utils
 
@@ -47,7 +51,46 @@ def parse_image_status(data: Any):
         raise Exception(f"Image status not compatible with bootstrap: {image_status}")
 
 
+def build_ami_logs(
+    data: Any,
+    log_client: CloudWatchLogsClient,
+    start_time: int = 0
+):
+    """
+
+    'imageBuildLogsArn': 'arn:aws:logs:us-east-1:018835827632:log-group:/aws/imagebuilder/ParallelClusterImage-pcluster-3-2-1-wnl8bh-20221019'
+    Parameters
+    ----------
+    data
+    log_client
+    start_time
+
+    Returns
+    -------
+
+    """
+    log_stream_name = data['imageBuildLogsArn']
+    log_stream_name = log_stream_name.split(':').pop()
+    log_group = deepcopy(log_stream_name)
+    log_group = log_group.split('/')
+    log_group.pop()
+    log_group = list(filter(lambda x: x, log_group))
+    log_group = '/'.join(log_group)
+    log_stream_name = log_stream_name.split('/').pop()
+    start_time = print_logs(
+        client=log_client,
+        log_stream_name=log_stream_name,
+        log_group=log_group,
+        start_time=start_time
+    )
+    return start_time
+
+
 def build_in_progress(image_id: str, region="us-east-1"):
+    os.environ['AWS_DEFAULT_REGION'] = region
+    client = boto3.client('cloudwatch')
+    start_time = 0
+
     build_in_process = True
     n = 1
     while build_in_process:
@@ -59,20 +102,24 @@ def build_in_progress(image_id: str, region="us-east-1"):
                 command=f"pcluster describe-image --image-id {image_id} --region {region} > {tmpfile.name}",
                 return_all=True,
             )
-            # build_data = describe_image(image_id=image_id)
-            build_data = json.loads(open(tmpfile.name, 'r').read())
+            # build_data = describe_image(image_id=image_id, region=region)
+            build_data = json.loads(open(tmpfile.name, "r").read())
             logger.info(build_data)
+        print(f'Image Build:[{image_id} - {region}] Build in process: {build_in_process}')
+        start_time = build_ami_logs(data=build_data, log_client=client, start_time=start_time)
         build_in_process = parse_image_status(build_data)
+
         n = n + 1
         # sleep for 10 minutes
         if build_in_process:
             time.sleep(600)
+    return
 
 
 def build_complete(
     image_id: str, output_file: str, region="us-east-1"
 ) -> DescribeImageResponseContent:
-    build_data = describe_image(image_id=image_id)
+    build_data = describe_image(image_id=image_id, region=region)
     return build_data
 
 
