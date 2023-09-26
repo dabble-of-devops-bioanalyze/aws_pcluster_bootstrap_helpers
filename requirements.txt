@@ -1,8 +1,6 @@
 typer
 typer[all]
 rich
-ansible
-ansible-runner
 aws-parallelcluster>=3.5
 inquirer
 colorlog
