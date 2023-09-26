@@ -61,7 +61,7 @@ def watch_create_cluster(cluster_name: str, region="us-east-1"):
                 describe-cluster \\
                 -n {cluster_name} \\
                 -r {region} > {tmpfile.name}""",
-                return_all=True,
+                # return_all=True,
             )
             create_in_process = parse_json_status(contents, tmpfile.name)
         n = n + 1

@@ -122,12 +122,12 @@ def build_in_progress(image_id: str, region="us-east-1"):
 
 def build_complete(image_id: str, output_file: str, region="us-east-1"):
     try:
-        shell_run_command(
+        run_bash_verbose(
             command=f"""pcluster describe-image \\
       --image-id {image_id} \\
       -r {region} > {output_file} \\
     """,
-            return_all=True,
+            # return_all=True,
         )
     except Exception as e:
         return
