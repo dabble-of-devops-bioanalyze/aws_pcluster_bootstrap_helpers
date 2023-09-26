@@ -1,11 +1,9 @@
 typer
 typer[all]
 rich
-aws-parallelcluster>=3.5
 inquirer
 colorlog
 textual
-click>=8
 datasize
 questionary
 boto3-stubs[s3,ec2,batch,logs,essential]
@@ -15,3 +13,5 @@ humanize
 cookiecutter
 pandas
 numpy
+
+# pinned versions
