@@ -198,7 +198,7 @@ def configure_storage(region="us-east-1"):
     create_scratch = questionary.confirm("Create new storage for /scratch?", default=False).ask()
 
     data = dict(
-        aps_efs_id=None,
+        apps_efs_id=None,
         scratch_efs_id=None,
         create_apps=False,
         create_scratch=False,
