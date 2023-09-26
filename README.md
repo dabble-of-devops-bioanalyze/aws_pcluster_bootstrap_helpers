@@ -11,6 +11,7 @@ Helpers to bootstrap a AWS PCluster + SLURM + Custom AMIs
 ## Features
 
 - Build a PCluster AMI and watch it
+- Build a PCluster Cluster
 
 Please note that you must build new AMIs per version of parallel cluster and region.
 
