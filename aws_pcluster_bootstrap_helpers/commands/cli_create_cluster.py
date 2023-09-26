@@ -1,13 +1,12 @@
 import os
 import pathlib
-from prefect import flow, task
-from prefect_shell import shell_run_command
 import time
 import tempfile
 import json
 
 from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
 from pcluster.api.controllers.cluster_operations_controller import list_clusters
+from aws_pcluster_bootstrap_helpers.utils.commands import run_bash_verbose
 
 from pcluster import utils
 
@@ -57,7 +56,7 @@ def watch_create_cluster(cluster_name: str, region="us-east-1"):
             logger.info(
                 f"Pcluster: {cluster_name}, Region: {region}, N: {1} Data file: {tmpfile.name}"
             )
-            contents = shell_run_command(
+            contents = run_bash_verbose(
                 command=f"""pcluster \\
                 describe-cluster \\
                 -n {cluster_name} \\
@@ -112,7 +111,6 @@ def create_cluster(cluster_name: str, region: str, config_file: str):
     return
 
 
-@flow
 def watch_cluster_create_flow(
     cluster_name: str,
     config_file: pathlib.Path,
@@ -125,7 +123,6 @@ def watch_cluster_create_flow(
     return True
 
 
-@flow
 def create_cluster_flow(
     cluster_name: str,
     config_file: pathlib.Path,

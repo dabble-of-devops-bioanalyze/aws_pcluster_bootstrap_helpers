@@ -2,24 +2,16 @@
 import os
 
 import json
-from pcluster.cli.commands.configure.easyconfig import (
-    _get_subnets,
-    _get_vpcs_and_subnets,
-    _create_vpc_parameters,
-)
-from pcluster.cli.commands.configure.utils import (
-    get_regions,
-)
 import pathlib
 import typer
-import datetime
-from pcluster.constants import (
-    DEFAULT_MAX_COUNT,
-    DEFAULT_MIN_COUNT,
-    MAX_NUMBER_OF_COMPUTE_RESOURCES,
-    MAX_NUMBER_OF_QUEUES,
-    SUPPORTED_SCHEDULERS,
-)
+# import datetime
+# from pcluster.constants import (
+#     DEFAULT_MAX_COUNT,
+#     DEFAULT_MIN_COUNT,
+#     MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
+#     MAX_NUMBER_OF_QUEUES,
+#     SUPPORTED_SCHEDULERS,
+# )
 from aws_pcluster_bootstrap_helpers.commands import (
     cli_build_ami,
     cli_instance_types,
@@ -147,15 +139,18 @@ def configure(
     id = f"{namespace}-{environment}-{stage}-{name}"
     json_file = f"{id}.json"
     os.environ["AWS_DEFAULT_REGION"] = region
-    network_data = cli_configure.configure(region=region)
+    data = cli_configure.configure(region=region)
     configure_data = {
         "namespace": namespace,
         "environment": environment,
         "stage": stage,
         "name": name,
         "region": region,
-        "terraform_vars": network_data,
+        "terraform_vars": data['network_data'],
     }
+    configure_data.update(data['dns'])
+    configure_data.update(data['efs'])
+    configure_data.update(data['elastic_ip'])
     logger.info(f"Writing file to : {json_file}")
     logger.info(configure_data)
     with open(json_file, "w") as fh:

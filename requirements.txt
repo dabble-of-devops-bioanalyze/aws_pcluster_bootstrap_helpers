@@ -1,10 +1,9 @@
 typer
-rich
 typer[all]
-prefect>=2
-prefect-shell
-prefect-aws
-aws-parallelcluster>=3.1
+rich
+ansible
+ansible-runner
+aws-parallelcluster>=3.5
 inquirer
 colorlog
 textual
@@ -15,3 +14,6 @@ boto3-stubs[s3,ec2,batch,logs,essential]
 boto3
 funcy
 humanize
+
+pandas
+numpy

@@ -71,27 +71,35 @@ def setup_logger(
 class log_durations(LabeledContextDecorator):
     """Times each function call or block execution."""
 
-    def __init__(self, print_func, label, unit='auto', threshold=-1, repr_len=REPR_LEN):
-        LabeledContextDecorator.__init__(self, print_func, label=label, repr_len=repr_len)
+    def __init__(self, print_func, label, unit="auto", threshold=-1, repr_len=REPR_LEN):
+        LabeledContextDecorator.__init__(
+            self, print_func, label=label, repr_len=repr_len
+        )
         if unit not in time_formatters:
-            raise ValueError('Unknown time unit: %s. It should be ns, mks, ms, s or auto.' % unit)
+            raise ValueError(
+                "Unknown time unit: %s. It should be ns, mks, ms, s or auto." % unit
+            )
         self.format_time = time_formatters[unit]
         self.threshold = threshold
 
     def __enter__(self):
         # self.start = timer()
         self.start = datetime.datetime.now()
-        self.print_func(f"""\n####################################################
+        self.print_func(
+            f"""\n####################################################
 # Begin: {self.label}
 ####################################################\n
-            """)
+            """
+        )
         return self
 
     def __exit__(self, *exc):
         duration = datetime.datetime.now() - self.start
         duration_str = humanize.precisedelta(duration, minimum_unit="seconds")
-        self.print_func(f"""\n####################################################
+        self.print_func(
+            f"""\n####################################################
 # Complete: {self.label}
 # Duration: {duration_str}
 ####################################################\n
-            """)
+            """
+        )
