@@ -10,14 +10,20 @@ from pcluster.cli.commands.configure.easyconfig import (
 from pcluster.cli.commands.configure.easyconfig import (
     _get_vpcs_and_subnets,
 )
-from pcluster.constants import (
-    DEFAULT_MAX_COUNT,
-    DEFAULT_MIN_COUNT,
-    MAX_COMPUTE_RESOURCES_PER_QUEUE,
-    MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
+from aws_pcluster_bootstrap_helpers.utils.constants import (
     MAX_NUMBER_OF_QUEUES,
-    SUPPORTED_SCHEDULERS,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_QUEUE,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
 )
+# from pcluster.constants import (
+#     DEFAULT_MAX_COUNT,
+#     DEFAULT_MIN_COUNT,
+#     MAX_COMPUTE_RESOURCES_PER_QUEUE,
+#     MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
+#     MAX_NUMBER_OF_QUEUES,
+#     SUPPORTED_SCHEDULERS,
+# )
 from pcluster.utils import error, get_supported_os_for_scheduler
 from pcluster.validators.cluster_validators import NameValidator
 from pcluster.aws.aws_api import AWSApi

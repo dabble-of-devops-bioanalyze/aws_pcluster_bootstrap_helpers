@@ -72,12 +72,11 @@ def watch_create_cluster(cluster_name: str, region="us-east-1"):
 
 
 def describe_cluster(cluster_name: str, output_file: str, region="us-east-1"):
-    contents = shell_run_command(
+    contents = run_bash_verbose(
         command=f"""pcluster \\
         describe-cluster \\
         -n {cluster_name} \\
         --region {region} > {output_file}""",
-        return_all=True,
     )
     create_in_process = parse_json_status(contents, output_file)
     return create_in_process
@@ -99,14 +98,13 @@ def create_cluster(cluster_name: str, region: str, config_file: str):
         )
         state = True
     else:
-        state = shell_run_command(
+        state = run_bash_verbose(
             command=f"""pcluster create-cluster \\
       --rollback-on-failure false \\
       -n {cluster_name} \\
       -r {region} \\
       -c {config_file}
     """,
-            return_all=True,
         )
     return
 

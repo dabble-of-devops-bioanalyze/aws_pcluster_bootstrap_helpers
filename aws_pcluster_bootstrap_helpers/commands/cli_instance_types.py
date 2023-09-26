@@ -7,7 +7,6 @@ from pcluster.aws.aws_api import AWSApi
 import pandas as pd
 
 from pcluster import utils
-from pcluster.constants import MAX_NUMBER_OF_QUEUES, MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER
 from datasize import DataSize
 from questionary.prompts import common
 from questionary.prompts.common import Choice, InquirerControl, Separator
@@ -17,6 +16,14 @@ from aws_pcluster_bootstrap_helpers.utils.logging import setup_logger
 
 PCLUSTER_VERSION = utils.get_installed_version()
 logger = setup_logger("configure-queues")
+
+# from pcluster.constants import MAX_NUMBER_OF_QUEUES, MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER
+from aws_pcluster_bootstrap_helpers.utils.constants import (
+    MAX_NUMBER_OF_QUEUES,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_QUEUE,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES,
+    MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
+)
 
 include_families = [
     "t3a",

@@ -4,14 +4,6 @@ import os
 import json
 import pathlib
 import typer
-# import datetime
-# from pcluster.constants import (
-#     DEFAULT_MAX_COUNT,
-#     DEFAULT_MIN_COUNT,
-#     MAX_NUMBER_OF_COMPUTE_RESOURCES_PER_CLUSTER,
-#     MAX_NUMBER_OF_QUEUES,
-#     SUPPORTED_SCHEDULERS,
-# )
 from aws_pcluster_bootstrap_helpers.commands import (
     cli_build_ami,
     cli_instance_types,
